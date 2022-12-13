@@ -53,6 +53,51 @@ describe("'exportType' option", () => {
   });
 
   it("should work with 'string' value and generate source maps", async () => {
+    const compiler = getCompiler(
+      "./basic-string-scss.js",
+      {},
+      {
+        module: {
+          rules: [
+            {
+              test: /\.s[ca]ss$/i,
+              rules: [
+                {
+                  loader: path.resolve(__dirname, "../src"),
+                  options: {
+                    sourceMap: true,
+                    exportType: "string",
+                  },
+                },
+                {
+                  loader: "sass-loader",
+                  options: {
+                    sourceMap: true,
+                    // eslint-disable-next-line global-require
+                    implementation: require("sass"),
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      }
+    );
+    const stats = await compile(compiler);
+
+    expect(
+      getModuleSource("./basic-css-style-sheet.scss", stats)
+    ).toMatchSnapshot("string");
+
+    expect(getExecutedCode("main.bundle.js", compiler, stats)).toMatchSnapshot(
+      "result"
+    );
+
+    expect(getWarnings(stats)).toMatchSnapshot("warnings");
+    expect(getErrors(stats)).toMatchSnapshot("errors");
+  });
+
+  it("should work with 'string' value and generate source maps", async () => {
     const compiler = getCompiler("./basic-string.js", {
       exportType: "string",
       sourceMap: true,
